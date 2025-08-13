@@ -1,0 +1,19 @@
+{{- $gistUrl := .Get 0 -}}
+{{- $lang := .Get 1 -}}
+{{- if $gistUrl -}}
+    {{- $rawUrl := replace $gistUrl "/gist.github.com/" "/gist.githubusercontent.com/" -}}
+    {{- $rawUrl = printf "%s/raw" $rawUrl -}}
+    {{- $resource := resources.GetRemote $rawUrl -}}
+    {{- if $resource -}}
+        {{- if $lang -}}
+            {{ highlight $resource.Content $lang "" }}
+        {{- else -}}
+            <pre><code>{{- $resource.Content | htmlEscape -}}</code></pre>
+        {{- end -}}
+        <p style="text-align: right; font-size: 0.8em; margin-top: 0.5em; opacity: 0.7;"><a href="{{ $gistUrl }}" target="_blank">View Gist</a></p>
+    {{- else -}}
+        <div class="error">Failed to fetch content from: {{ $gistUrl }}</div>
+    {{- end -}}
+{{- else -}}
+    <div class="error">GitHub Gist URL is required</div>
+{{- end -}}
