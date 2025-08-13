@@ -1,18 +1,64 @@
 {{- $gistUrl := .Get 0 -}}
 {{- $lang := .Get 1 -}}
 {{- if $gistUrl -}}
-    {{- $rawUrl := replace $gistUrl "/gist.github.com/" "/gist.githubusercontent.com/" -}}
-    {{- $rawUrl = printf "%s/raw" $rawUrl -}}
+    {{- $baseUrl := $gistUrl -}}
+    {{- $startLine := 0 -}}
+    {{- $endLine := 0 -}}
+
+    {{- if strings.Contains $gistUrl "#" -}}
+        {{- $parts := split $gistUrl "#" -}}
+        {{- $baseUrl = index $parts 0 -}}
+        {{- $fragment := index $parts 1 -}}
+
+        {{- $matches := findRE "L([0-9]+)(-L([0-9]+))?" $fragment -}}
+        {{- if $matches -}}
+            {{- $match := index $matches 0 -}}
+            {{- if strings.Contains $match "-L" -}}
+                {{- $lineParts := strings.Split $match "-L" -}}
+                {{- $firstPart := index $lineParts 0 -}}
+                {{- $firstPart = strings.Replace $firstPart "L" "" 1 -}}
+                {{- $startLine = int $firstPart -}}
+                {{- $endLine = int (index $lineParts 1) -}}
+            {{- else -}}
+                {{- $match = strings.Replace $match "L" "" 1 -}}
+                {{- $startLine = int $match -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+
+    {{- $rawUrl := printf "%s/raw" $baseUrl -}}
     {{- $resource := resources.GetRemote $rawUrl -}}
     {{- if $resource -}}
-        {{- if $lang -}}
-            {{ highlight $resource.Content $lang "" }}
-        {{- else -}}
-            <pre><code>{{- $resource.Content | htmlEscape -}}</code></pre>
+        {{- $content := $resource.Content -}}
+        {{- $lines := split $content "\n" -}}
+
+        {{- if and (gt $startLine 0) (gt $endLine 0) -}}
+            {{- $startIndex := sub $startLine 1 -}}
+            {{- $endIndex := sub $endLine $startIndex -}}
+            {{- $afterLines := after $startIndex $lines -}}
+            {{- $selectedLines := first $endIndex $afterLines -}}
+            {{- $content = delimit $selectedLines "\n" -}}
+        {{- else if gt $startLine 0 -}}
+            {{- $startIndex := sub $startLine 1 -}}
+            {{- $selectedLines := slice $lines $startIndex -}}
+            {{- $content = delimit $selectedLines "\n" -}}
         {{- end -}}
-        <p style="text-align: right; font-size: 0.8em; margin-top: 0.5em; opacity: 0.7;"><a href="{{ $gistUrl }}" target="_blank">View Gist</a></p>
+
+        {{- if $lang -}}
+            {{ highlight $content $lang "" }}
+        {{- else -}}
+            <pre><code>{{- $content | htmlEscape -}}</code></pre>
+        {{- end -}}
+
+        {{- $linkText := "View Gist" -}}
+        {{- if and (gt $startLine 0) (gt $endLine 0) -}}
+            {{- $linkText = printf "View Gist (lines %d-%d)" $startLine $endLine -}}
+        {{- else if gt $startLine 0 -}}
+            {{- $linkText = printf "View Gist (from line %d)" $startLine -}}
+        {{- end -}}
+        <p style="text-align: right; font-size: 0.8em; margin-top: 0.5em; opacity: 0.7;"><a href="{{ $gistUrl }}" target="_blank">{{ $linkText }}</a></p>
     {{- else -}}
-        <div class="error">Failed to fetch content from: {{ $gistUrl }}</div>
+        <div class="error">Failed to fetch content from: {{ $baseUrl }}</div>
     {{- end -}}
 {{- else -}}
     <div class="error">GitHub Gist URL is required</div>
