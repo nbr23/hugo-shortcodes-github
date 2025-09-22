@@ -2,10 +2,57 @@
 {{- $lang := .Get 1 -}}
 {{- $title := .Get 2 -}}
 {{- if $githubUrl -}}
-    {{- $rawUrl := replace $githubUrl "/github.com/" "/raw.githubusercontent.com/" -}}
+    {{- $baseUrl := $githubUrl -}}
+    {{- $startLine := 0 -}}
+    {{- $endLine := 0 -}}
+
+    {{- if strings.Contains $githubUrl "#" -}}
+        {{- $parts := split $githubUrl "#" -}}
+        {{- $baseUrl = index $parts 0 -}}
+        {{- $fragment := index $parts 1 -}}
+
+        {{- $matches := findRE "L([0-9]+)(-L([0-9]+))?" $fragment -}}
+        {{- if $matches -}}
+            {{- $match := index $matches 0 -}}
+            {{- if strings.Contains $match "-L" -}}
+                {{- $lineParts := strings.Split $match "-L" -}}
+                {{- $firstPart := index $lineParts 0 -}}
+                {{- $firstPart = strings.Replace $firstPart "L" "" 1 -}}
+                {{- $startLine = int $firstPart -}}
+                {{- $endLine = int (index $lineParts 1) -}}
+            {{- else -}}
+                {{- $match = strings.Replace $match "L" "" 1 -}}
+                {{- $startLine = int $match -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+
+    {{- $rawUrl := replace $baseUrl "/github.com/" "/raw.githubusercontent.com/" -}}
     {{- $rawUrl = replace $rawUrl "/blob/" "/" -}}
     {{- $resource := resources.GetRemote $rawUrl -}}
     {{- if $resource -}}
+        {{- $content := $resource.Content -}}
+        {{- $lines := split $content "\n" -}}
+
+        {{- if and (gt $startLine 0) (gt $endLine 0) -}}
+            {{- $startIndex := sub $startLine 1 -}}
+            {{- $endIndex := sub $endLine $startIndex -}}
+            {{- $afterLines := after $startIndex $lines -}}
+            {{- $selectedLines := first $endIndex $afterLines -}}
+            {{- $content = delimit $selectedLines "\n" -}}
+        {{- else if gt $startLine 0 -}}
+            {{- $startIndex := sub $startLine 1 -}}
+            {{- $selectedLines := slice $lines $startIndex -}}
+            {{- $content = delimit $selectedLines "\n" -}}
+        {{- end -}}
+
+        {{- $linkText := "View Code" -}}
+        {{- if and (gt $startLine 0) (gt $endLine 0) -}}
+            {{- $linkText = printf "View Code (lines %d-%d)" $startLine $endLine -}}
+        {{- else if gt $startLine 0 -}}
+            {{- $linkText = printf "View Code (from line %d)" $startLine -}}
+        {{- end -}}
+
         <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; margin: 1.5em 0 0 0; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <svg width="16" height="16" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
@@ -14,7 +61,7 @@
                 {{- if $title -}}
                     <span style="font-weight: 500; color: rgba(255,255,255,0.8); font-size: 12px;">{{ $title }}</span>
                 {{- else -}}
-                    <span style="font-weight: 500; color: rgba(255,255,255,0.8); font-size: 12px;">GitHub</span>
+                    <span style="font-weight: 500; color: rgba(255,255,255,0.8); font-size: 12px;">Code</span>
                 {{- end -}}
             </div>
             <a href="{{ $githubUrl }}" target="_blank" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12px; font-weight: 400; display: flex; align-items: center; gap: 4px; opacity: 0.8; transition: opacity 0.2s;">
@@ -22,34 +69,34 @@
                     <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
                     <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
                 </svg>
-                view source
+                {{ $linkText | lower }}
             </a>
         </div>
-        <div style="margin: 0; border-radius: 0 0 6px 6px; overflow: hidden;">
+        <div style="margin: 0 0 0 0; border-radius: 0 0 6px 6px; overflow: hidden;">
             {{- if $lang -}}
                 <div style="margin: 0; padding: 0;">
                     <style>
-                        .github-code-embed .highlight,
-                        .github-code-embed .highlight pre,
-                        .github-code-embed .highlight code,
-                        .github-code-embed pre,
-                        .github-code-embed code {
+                        .github-gist-embed .highlight,
+                        .github-gist-embed .highlight pre,
+                        .github-gist-embed .highlight code,
+                        .github-gist-embed pre,
+                        .github-gist-embed code {
                             margin: 0 !important;
                             border-radius: 0 !important;
                         }
-                        .github-code-embed .highlight {
+                        .github-gist-embed .highlight {
                             padding: 0 !important;
                         }
                     </style>
-                    <div class="github-code-embed">{{ highlight $resource.Content $lang "" }}</div>
+                    <div class="github-gist-embed">{{ highlight $content $lang "" }}</div>
                 </div>
             {{- else -}}
-                <pre style="margin: 0; padding: 1rem;"><code>{{- $resource.Content | htmlEscape -}}</code></pre>
+                <pre style="margin: 0; padding: 1rem;"><code>{{- $content | htmlEscape -}}</code></pre>
             {{- end -}}
         </div>
     {{- else -}}
         <div style="border: 1px solid rgba(248, 81, 73, 0.3); border-radius: 6px; padding: 12px; background: rgba(248, 81, 73, 0.1); color: rgba(255,255,255,0.9); margin: 1.5em 0;">
-            <strong>Error:</strong> Failed to fetch content from: {{ $githubUrl }}
+            <strong>Error:</strong> Failed to fetch content from: {{ $baseUrl }}
         </div>
     {{- end -}}
 {{- else -}}
