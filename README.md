@@ -23,50 +23,68 @@ theme: ['your-main-theme', 'hugo-shortcodes-github']
 Use the `github-code-embed` shortcode to display file content from GitHub repositories:
 
 ```
-{{< github-code-embed "https://github.com/nbr23/bunny-pack/blob/master/contentScript.js" "javascript" >}}
+{{< github-code-embed url="https://github.com/nbr23/bunny-pack/blob/master/contentScript.js" lang="javascript" >}}
 ```
 
 #### Parameters
 
-1. **GitHub URL** (required): The regular GitHub file URL (e.g., `https://github.com/nbr23/bunny-pack/blob/master/manifest.json`)
-2. **Language** (optional): The programming language for syntax highlighting (e.g., `javascript`, `python`, `go`)
+- `url` (required): The regular GitHub file URL
+- `lang` (optional): Language for syntax highlighting (e.g., `javascript`, `python`, `go`)
+- `title` (optional): Display title shown in the embed header
+- `copy` (optional): Set to `true` to render a copy-to-clipboard button in the header
 
 #### Examples
 
 Display a JavaScript file with syntax highlighting:
 ```
-{{< github-code-embed "https://github.com/nbr23/bunny-pack/blob/master/manifest.json" "json" >}}
+{{< github-code-embed url="https://github.com/nbr23/bunny-pack/blob/master/manifest.json" lang="json" >}}
 ```
 
 Display a file without syntax highlighting:
 ```
-{{< github-code-embed "github.com/nbr23/bunny-pack/blob/master/README.md" >}}
+{{< github-code-embed url="https://github.com/nbr23/bunny-pack/blob/master/README.md" >}}
 ```
+
+Display with a copy button:
+```
+{{< github-code-embed url="https://github.com/nbr23/bunny-pack/blob/master/manifest.json" lang="json" title="My file" copy=true >}}
+```
+
+> The `copy` feature requires the consumer theme to provide `.github-embed-copy` CSS styling.
 
 ### GitHub Gist Embed
 
 Use the `github-gist-embed` shortcode to display content from GitHub Gists:
 
 ```
-{{< github-gist-embed "https://gist.github.com/username/gist-id" "javascript" >}}
+{{< github-gist-embed url="https://gist.github.com/username/gist-id" lang="javascript" >}}
 ```
 
 #### Parameters
 
-1. **Gist URL** (required): The GitHub Gist URL (e.g., `https://gist.github.com/username/abc123`)
-2. **Language** (optional): The programming language for syntax highlighting (e.g., `javascript`, `python`, `go`)
+- `url` (required): The GitHub Gist URL
+- `lang` (optional): Language for syntax highlighting (e.g., `javascript`, `python`, `go`)
+- `title` (optional): Display title shown in the embed header
+- `copy` (optional): Set to `true` to render a copy-to-clipboard button in the header
 
 #### Examples
 
 Display a JavaScript gist with syntax highlighting:
 ```
-{{< github-gist-embed "https://gist.github.com/nbr23/abc123def456" "javascript" >}}
+{{< github-gist-embed url="https://gist.github.com/nbr23/abc123def456" lang="javascript" >}}
 ```
 
 Display a gist without syntax highlighting:
 ```
-{{< github-gist-embed "https://gist.github.com/nbr23/abc123def456" >}}
+{{< github-gist-embed url="https://gist.github.com/nbr23/abc123def456" >}}
 ```
+
+Display with a copy button:
+```
+{{< github-gist-embed url="https://gist.github.com/nbr23/abc123def456" lang="python" title="My script" copy=true >}}
+```
+
+> The `copy` feature requires the consumer theme to provide `.github-embed-copy` CSS styling.
 
 ## License
 
