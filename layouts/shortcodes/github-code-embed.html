@@ -31,6 +31,11 @@
 
     {{- $rawUrl := replace $baseUrl "/github.com/" "/raw.githubusercontent.com/" -}}
     {{- $rawUrl = replace $rawUrl "/blob/" "/" -}}
+    {{- if and (gt $startLine 0) (gt $endLine 0) -}}
+        {{- $rawUrl = printf "%s?L%d-L%d" $rawUrl $startLine $endLine -}}
+    {{- else if gt $startLine 0 -}}
+        {{- $rawUrl = printf "%s?L%d" $rawUrl $startLine -}}
+    {{- end -}}
     {{- $resource := resources.GetRemote $rawUrl -}}
     {{- if $resource -}}
         {{- $content := $resource.Content -}}
