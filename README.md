@@ -107,7 +107,7 @@ The shortcodes render HTML using the following classes. Your theme must provide 
 | `.github-embed-header-right` | Right header section | Link and copy button |
 | `.github-embed-title` | Title text | |
 | `.github-embed-body` | Code content area | Wraps the `pre`/`code` block |
-| `.github-embed-copy` | Copy button | Only rendered when `copy=true` |
+| `.github-embed-copy` | Copy button | Only when `copy=true`, created by an inline script so it never shows without JavaScript |
 | `.github-embed-error` | Error message | Rendered when the URL is missing or the fetch fails |
 
 ## License

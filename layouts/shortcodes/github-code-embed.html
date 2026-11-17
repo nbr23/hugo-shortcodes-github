@@ -69,13 +69,25 @@
                 <span class="github-embed-header-right">
                     <a href="{{ $githubUrl }}">{{ $linkText | lower }}</a>
                     {{- if $copy -}}
-                    <button class="github-embed-copy" title="Copy to clipboard"
-                      onclick="var b=this,p=b.closest('.github-embed').querySelector('pre');navigator.clipboard.writeText(p.textContent).then(function(){b.style.opacity='1';setTimeout(function(){b.style.opacity=''},1500)})">
-                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round">
-                        <rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1"/>
-                        <path d="M8.5 4.5V2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v5.5a1 1 0 0 0 1 1h2.5"/>
-                      </svg>
-                    </button>
+                    <script>
+                      (function () {
+                        if (!navigator.clipboard) return;
+                        var s = document.currentScript, b = document.createElement('button');
+                        b.type = 'button';
+                        b.className = 'github-embed-copy';
+                        b.title = 'Copy to clipboard';
+                        b.setAttribute('aria-label', 'Copy to clipboard');
+                        b.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1"/><path d="M8.5 4.5V2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v5.5a1 1 0 0 0 1 1h2.5"/></svg>';
+                        b.addEventListener('click', function () {
+                          var p = b.closest('.github-embed').querySelector('pre');
+                          navigator.clipboard.writeText(p.textContent).then(function () {
+                            b.style.opacity = '1';
+                            setTimeout(function () { b.style.opacity = ''; }, 1500);
+                          });
+                        });
+                        s.parentNode.replaceChild(b, s);
+                      })();
+                    </script>
                     {{- end -}}
                 </span>
             </div>
