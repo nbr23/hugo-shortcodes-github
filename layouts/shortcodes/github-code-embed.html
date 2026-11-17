@@ -67,7 +67,7 @@
                     <span class="github-embed-title">{{ with $title }}{{ . }}{{ else }}Code{{ end }}</span>
                 </span>
                 <span class="github-embed-header-right">
-                    <a href="{{ $githubUrl }}" target="_blank" rel="noopener noreferrer">{{ $linkText | lower }}</a>
+                    <a href="{{ $githubUrl }}">{{ $linkText | lower }}</a>
                     {{- if $copy -}}
                     <button class="github-embed-copy" title="Copy to clipboard"
                       onclick="var b=this,p=b.closest('.github-embed').querySelector('pre');navigator.clipboard.writeText(p.textContent).then(function(){b.style.opacity='1';setTimeout(function(){b.style.opacity=''},1500)})">

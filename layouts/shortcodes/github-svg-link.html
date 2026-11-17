@@ -1,7 +1,7 @@
 {{- $url := .Get "url" | default (.Get 0) -}}
 {{- $text := .Get "text" | default (.Get 1) -}}
 {{- if $url -}}
-<a href="{{ $url | safeURL }}" target="_blank" rel="noopener noreferrer" class="github-link"><span>{{ $text | safeHTML }}</span></a>
+<a href="{{ $url | safeURL }}" class="github-link"><span>{{ $text | safeHTML }}</span></a>
 {{- else -}}
 <span class="github-link-error">[GitHub URL required]</span>
 {{- end -}}
